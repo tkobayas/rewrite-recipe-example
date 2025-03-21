@@ -125,6 +125,12 @@
             <version>7.0.0-M2</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-runtime</artifactId>
+            <version>4.10.1</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -229,4 +235,37 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>grammars</id>
+            <activation>
+                <property>
+                    <name>grammars</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <!-- Consider if we will generate codes with a specific profile and copy them to src/main -->
+                    <plugin>
+                        <groupId>org.antlr</groupId>
+                        <artifactId>antlr4-maven-plugin</artifactId>
+                        <version>4.10.1</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>antlr4</goal>
+                                </goals>
+                                <configuration>
+<!--                                    <visitor>true</visitor>-->
+<!--                                    <listener>false</listener>-->
+<!--                                    <libDirectory>src/main/resources/org/example/lst</libDirectory>-->
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
