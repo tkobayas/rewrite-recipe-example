@@ -6,6 +6,7 @@ import org.jspecify.annotations.Nullable;
 import org.openrewrite.ExecutionContext;
 import org.openrewrite.SourceFile;
 import org.openrewrite.Parser;
+import org.openrewrite.text.PlainTextParser;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -33,7 +34,7 @@ public class MyLangParserProvider implements Parser {
             MyLangASTNode root = builder.build(tree);
 
             // Wrap the original source and AST in a SourceFile.
-            MyLangSourceFile sourceFile = new MyLangSourceFile(source, root);
+            MyLangSourceFile sourceFile = new MyLangSourceFile(source, root, input.getPath());
             sourceFiles.add(sourceFile);
         }
         return sourceFiles.stream();
@@ -50,6 +51,31 @@ public class MyLangParserProvider implements Parser {
         // For demonstration, generate a fixed filename.
         // In a production setting, you could derive this based on the source content (e.g. via hashing).
         return prefix.resolve("MyLangSource.mylang");
+    }
+
+    public static MyLangParserProvider.Builder builder() {
+        return new MyLangParserProvider.Builder();
+    }
+
+    public static class Builder extends Parser.Builder {
+
+        public Builder(Class<? extends SourceFile> sourceFileType) {
+            super(sourceFileType);
+        }
+
+        public Builder() {
+            super(MyLangSourceFile.class);
+        }
+
+        @Override
+        public Parser build() {
+            return new MyLangParserProvider();
+        }
+
+        @Override
+        public String getDslName() {
+            return "";
+        }
     }
 }
 

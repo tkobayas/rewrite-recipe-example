@@ -6,7 +6,9 @@ import java.nio.file.Path;
 import java.util.UUID;
 
 import org.openrewrite.Checksum;
+import org.openrewrite.Cursor;
 import org.openrewrite.FileAttributes;
+import org.openrewrite.PrintOutputCapture;
 import org.openrewrite.SourceFile;
 import org.openrewrite.Tree;
 import org.openrewrite.TreeVisitor;
@@ -28,13 +30,27 @@ public class MyLangSourceFile implements SourceFile {
     /**
      * Constructor using default values for markers, sourcePath, charset, BOM, checksum and file attributes.
      */
-    public MyLangSourceFile(String originalSource, MyLangASTNode root) {
+    public MyLangSourceFile(String originalSource, MyLangASTNode root, Path sourcePath) {
         this(
                 originalSource,
                 root,
                 UUID.randomUUID(),
                 Markers.EMPTY,
+                sourcePath,
+                StandardCharsets.UTF_8,
+                false,
                 null,
+                null
+        );
+    }
+
+    public MyLangSourceFile(String originalSource, MyLangASTNode root, UUID id, Path sourcePath) {
+        this(
+                originalSource,
+                root,
+                id,
+                Markers.EMPTY,
+                sourcePath,
                 StandardCharsets.UTF_8,
                 false,
                 null,
@@ -63,6 +79,10 @@ public class MyLangSourceFile implements SourceFile {
         this.charsetBomMarked = charsetBomMarked;
         this.checksum = checksum;
         this.fileAttributes = fileAttributes;
+    }
+
+    public String getOriginalSource() {
+        return originalSource;
     }
 
     public MyLangASTNode getRoot() {
@@ -171,5 +191,10 @@ public class MyLangSourceFile implements SourceFile {
     @Override
     public String printAll() {
         return originalSource;
+    }
+
+    @Override
+    public <P> TreeVisitor<?, PrintOutputCapture<P>> printer(Cursor cursor) {
+        return new MyLangPrinter<>();
     }
 }
