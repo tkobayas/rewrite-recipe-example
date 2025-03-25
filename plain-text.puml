@@ -1,0 +1,58 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+interface Tree {
+    getId()
+    getMarkers()
+    accept(TreeVisitor<R, P> v, P p)
+    isAcceptable(TreeVisitor<?, P> v, P p)
+    printer(Cursor cursor)
+    print(Cursor cursor)
+}
+
+interface SourceFile extends Tree {
+    getSourcePath()
+    printAll()
+}
+
+interface SourceFileWithReferences extends SourceFile
+
+class PlainText implements SourceFileWithReferences {
+    printer(Cursor cursor) : PlainTextPrinter
+}
+
+PlainText-->PlainTextPrinter
+
+interface Parser {
+     parseInputs(Iterable<Input> sources, Path relativeTo, ExecutionContext ctx)
+}
+
+class PlainTextParser implements Parser
+
+PlainTextParser-->PlainText
+
+abstract class TreeVisitor<T extends Tree, P> {
+    isAcceptable(SourceFile sourceFile, P p)
+    isAdaptableTo(Class<? extends TreeVisitor> adaptTo)
+    visit(Tree tree, P p, Cursor parent)
+    visit(Tree tree, P p) : Tree
+}
+
+TreeVisitor-->Tree
+
+class PlainTextVisitor extends TreeVisitor {
+    visitText(PlainText text, P p)
+}
+
+class PlainTextPrinter extends PlainTextVisitor
+
+abstract class Recipe {
+    getVisitor() : TreeVisitor
+}
+
+Recipe-->TreeVisitor
+
+class FindAndReplace extends Recipe
+
+
+@enduml
