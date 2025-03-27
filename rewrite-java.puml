@@ -15,21 +15,26 @@ interface SourceFile extends Tree {
     printAll()
 }
 
-interface SourceFileWithReferences extends SourceFile
+interface JavaSourceFile extends SourceFile
 
-class PlainText implements SourceFileWithReferences {
-    printer(Cursor cursor) : PlainTextPrinter
+class CompilationUnit implements JavaSourceFile {
+    acceptJava(JavaVisitor<P> v, P p)
 }
 
-PlainText-->PlainTextPrinter
 
 interface Parser {
      parseInputs(Iterable<Input> sources, Path relativeTo, ExecutionContext ctx)
 }
 
-class PlainTextParser implements Parser
+interface JavaParser extends Parser
 
-PlainTextParser-->PlainText : produces
+class ReloadableJava17Parser implements JavaParser
+
+class ReloadableJava17ParserVisitor extends TreePathScanner
+
+ReloadableJava17Parser-->ReloadableJava17ParserVisitor
+
+ReloadableJava17ParserVisitor-->CompilationUnit : produces
 
 abstract class TreeVisitor<T extends Tree, P> {
     isAcceptable(SourceFile sourceFile, P p)
@@ -40,11 +45,12 @@ abstract class TreeVisitor<T extends Tree, P> {
 
 TreeVisitor-->Tree : visit
 
-class PlainTextVisitor extends TreeVisitor {
-    visitText(PlainText text, P p)
+class JavaVisitor<P> extends TreeVisitor {
+    visitCompilationUnit(J.CompilationUnit cu, P p)
 }
 
-class PlainTextPrinter extends PlainTextVisitor
+class JavaIsoVisitor<P> extends JavaVisitor {
+}
 
 abstract class Recipe {
     getVisitor() : TreeVisitor
@@ -52,8 +58,8 @@ abstract class Recipe {
 
 Recipe-->TreeVisitor : produces
 
-class FindAndReplace extends Recipe
+class RewriteTestClassesShouldNotBePublic extends Recipe
 
-FindAndReplace-->PlainTextVisitor : produces
+RewriteTestClassesShouldNotBePublic-->JavaIsoVisitor : produces
 
 @enduml
